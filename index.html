@@ -8,7 +8,101 @@
 	<meta name="description" content="Standalone web build of FNF: Zardy Foolhardy Mod Pack.">
 	<meta name="theme-color" content="#050505">
 	<link rel="icon" type="image/png" href="./assets/images/logo.png">
-	<script>window.addEventListener("load",function(){window.focus(),document.body.addEventListener("click",function(n){window.focus()},!1)}),window.addEventListener("keydown",function(n){-1<[32,37,38,39,40].indexOf(n.keyCode)&&n.preventDefault()},!1);</script>
+	<script>
+		(function () {
+			window.addEventListener("load", function () {
+				window.focus();
+				document.body.addEventListener("click", function () {
+					window.focus();
+				}, false);
+			});
+			window.addEventListener("keydown", function (event) {
+				if ([32, 37, 38, 39, 40].indexOf(event.keyCode) > -1) {
+					event.preventDefault();
+				}
+			}, false);
+
+			if (window.HTMLCanvasElement && HTMLCanvasElement.prototype.getContext) {
+				var nativeGetContext = HTMLCanvasElement.prototype.getContext;
+				HTMLCanvasElement.prototype.getContext = function (type, attributes) {
+					if (type === "2d") {
+						var options = {};
+						if (attributes && typeof attributes === "object") {
+							for (var key in attributes) {
+								if (Object.prototype.hasOwnProperty.call(attributes, key)) {
+									options[key] = attributes[key];
+								}
+							}
+						}
+						if (typeof options.willReadFrequently === "undefined") {
+							options.willReadFrequently = true;
+						}
+						return nativeGetContext.call(this, type, options);
+					}
+					return nativeGetContext.call(this, type, attributes);
+				};
+			}
+
+			var trackedContexts = [];
+			function trackContext(context) {
+				if (context) {
+					trackedContexts.push(context);
+				}
+				return context;
+			}
+
+			function resumeAudioContexts() {
+				for (var i = trackedContexts.length - 1; i >= 0; i--) {
+					var context = trackedContexts[i];
+					if (!context || typeof context.resume !== "function") {
+						trackedContexts.splice(i, 1);
+						continue;
+					}
+					if (context.state !== "running") {
+						try {
+							context.resume();
+						} catch (error) {}
+					}
+				}
+			}
+
+			function wrapAudioContext(name) {
+				var NativeContext = window[name];
+				if (typeof NativeContext !== "function") {
+					return;
+				}
+
+				function WrappedAudioContext() {
+					var context;
+					if (arguments.length === 0) {
+						context = new NativeContext();
+					} else if (arguments.length === 1) {
+						context = new NativeContext(arguments[0]);
+					} else {
+						var args = [null];
+						for (var i = 0; i < arguments.length; i++) {
+							args.push(arguments[i]);
+						}
+						context = new (Function.prototype.bind.apply(NativeContext, args))();
+					}
+					return trackContext(context);
+				}
+
+				WrappedAudioContext.prototype = NativeContext.prototype;
+				try {
+					Object.setPrototypeOf(WrappedAudioContext, NativeContext);
+				} catch (error) {}
+				window[name] = WrappedAudioContext;
+			}
+
+			wrapAudioContext("AudioContext");
+			wrapAudioContext("webkitAudioContext");
+
+			["pointerdown", "mousedown", "touchstart", "keydown"].forEach(function (eventName) {
+				window.addEventListener(eventName, resumeAudioContexts, { passive: true, capture: true });
+			});
+		})();
+	</script>
 		
 	<meta id="viewport" name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 	<meta name="apple-mobile-web-app-capable" content="yes">

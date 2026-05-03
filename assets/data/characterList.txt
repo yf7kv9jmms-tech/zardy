@@ -18,3 +18,4 @@ spirit
 zardy
 zardy-beatsteets
 zardy-retrospector
+zardy-beatstreets

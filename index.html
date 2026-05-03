@@ -10,6 +10,9 @@
 	<link rel="icon" type="image/png" href="./assets/images/logo.png">
 	<script>
 		(function () {
+			var userActivated = false;
+			var trackedContexts = [];
+
 			window.addEventListener("load", function () {
 				window.focus();
 				document.body.addEventListener("click", function () {
@@ -22,18 +25,26 @@
 				}
 			}, false);
 
-			if (window.HTMLCanvasElement && HTMLCanvasElement.prototype.getContext) {
-				var nativeGetContext = HTMLCanvasElement.prototype.getContext;
-				HTMLCanvasElement.prototype.getContext = function (type, attributes) {
-					if (type === "2d") {
-						var options = {};
-						if (attributes && typeof attributes === "object") {
-							for (var key in attributes) {
-								if (Object.prototype.hasOwnProperty.call(attributes, key)) {
-									options[key] = attributes[key];
-								}
-							}
+			function copyContextAttributes(attributes) {
+				var options = {};
+				if (attributes && typeof attributes === "object") {
+					for (var key in attributes) {
+						if (Object.prototype.hasOwnProperty.call(attributes, key)) {
+							options[key] = attributes[key];
 						}
+					}
+				}
+				return options;
+			}
+
+			function patchCanvasGetContext(target) {
+				if (!target || !target.getContext || target.__codexWillReadPatched) {
+					return;
+				}
+				var nativeGetContext = target.getContext;
+				target.getContext = function (type, attributes) {
+					if (type === "2d") {
+						var options = copyContextAttributes(attributes);
 						if (typeof options.willReadFrequently === "undefined") {
 							options.willReadFrequently = true;
 						}
@@ -41,14 +52,41 @@
 					}
 					return nativeGetContext.call(this, type, attributes);
 				};
+				target.__codexWillReadPatched = true;
 			}
 
-			var trackedContexts = [];
+			patchCanvasGetContext(window.HTMLCanvasElement && HTMLCanvasElement.prototype);
+			patchCanvasGetContext(window.OffscreenCanvas && OffscreenCanvas.prototype);
+
 			function trackContext(context) {
-				if (context) {
+				if (context && trackedContexts.indexOf(context) === -1) {
 					trackedContexts.push(context);
 				}
 				return context;
+			}
+
+			function isUserActivationAvailable() {
+				return !!(navigator.userActivation && (navigator.userActivation.isActive || navigator.userActivation.hasBeenActive));
+			}
+
+			function markActivated() {
+				userActivated = true;
+				resumeAudioContexts();
+			}
+
+			function patchAudioResume(proto) {
+				if (!proto || !proto.resume || proto.__codexResumePatched) {
+					return;
+				}
+				var nativeResume = proto.resume;
+				proto.resume = function () {
+					var context = trackContext(this);
+					if (!userActivated && !isUserActivationAvailable()) {
+						return Promise.resolve(context);
+					}
+					return nativeResume.call(context);
+				};
+				proto.__codexResumePatched = true;
 			}
 
 			function resumeAudioContexts() {
@@ -71,6 +109,7 @@
 				if (typeof NativeContext !== "function") {
 					return;
 				}
+				patchAudioResume(NativeContext.prototype);
 
 				function WrappedAudioContext() {
 					var context;
@@ -99,7 +138,7 @@
 			wrapAudioContext("webkitAudioContext");
 
 			["pointerdown", "mousedown", "touchstart", "keydown"].forEach(function (eventName) {
-				window.addEventListener(eventName, resumeAudioContexts, { passive: true, capture: true });
+				window.addEventListener(eventName, markActivated, { passive: true, capture: true });
 			});
 		})();
 	</script>

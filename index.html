@@ -11,6 +11,7 @@
 	<script>
 		(function () {
 			var userActivated = false;
+			var allowNativeResume = false;
 			var trackedContexts = [];
 
 			window.addEventListener("load", function () {
@@ -71,7 +72,12 @@
 
 			function markActivated() {
 				userActivated = true;
-				resumeAudioContexts();
+				allowNativeResume = true;
+				try {
+					resumeAudioContexts();
+				} finally {
+					allowNativeResume = false;
+				}
 			}
 
 			function patchAudioResume(proto) {
@@ -81,10 +87,23 @@
 				var nativeResume = proto.resume;
 				proto.resume = function () {
 					var context = trackContext(this);
-					if (!userActivated && !isUserActivationAvailable()) {
+					if (!context || context.state === "closed") {
 						return Promise.resolve(context);
 					}
-					return nativeResume.call(context);
+					if (!allowNativeResume && !isUserActivationAvailable()) {
+						return Promise.resolve(context);
+					}
+					try {
+						var result = nativeResume.call(context);
+						if (result && typeof result.catch === "function") {
+							return result.catch(function () {
+								return context;
+							});
+						}
+						return Promise.resolve(context);
+					} catch (error) {
+						return Promise.resolve(context);
+					}
 				};
 				proto.__codexResumePatched = true;
 			}

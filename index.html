@@ -1,235 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	
 	<meta charset="utf-8">
-	
 	<title>FNF: Zardy Foolhardy Mod Pack</title>
 	<meta name="description" content="Standalone web build of FNF: Zardy Foolhardy Mod Pack.">
 	<meta name="theme-color" content="#050505">
 	<link rel="icon" type="image/png" href="./assets/images/logo.png">
 	<script>
-		(function () {
-			var userActivated = false;
-			var allowNativeResume = false;
-			var trackedContexts = [];
-
-			window.addEventListener("load", function () {
+		window.addEventListener("load", function () {
+			window.focus();
+			document.body.addEventListener("click", function () {
 				window.focus();
-				document.body.addEventListener("click", function () {
-					window.focus();
-				}, false);
-			});
-			window.addEventListener("keydown", function (event) {
-				if ([32, 37, 38, 39, 40].indexOf(event.keyCode) > -1) {
-					event.preventDefault();
-				}
 			}, false);
-
-			function copyContextAttributes(attributes) {
-				var options = {};
-				if (attributes && typeof attributes === "object") {
-					for (var key in attributes) {
-						if (Object.prototype.hasOwnProperty.call(attributes, key)) {
-							options[key] = attributes[key];
-						}
-					}
-				}
-				return options;
+		});
+		window.addEventListener("keydown", function (event) {
+			if ([32, 37, 38, 39, 40].indexOf(event.keyCode) > -1) {
+				event.preventDefault();
 			}
-
-			function patchCanvasGetContext(target) {
-				if (!target || !target.getContext || target.__codexWillReadPatched) {
-					return;
-				}
-				var nativeGetContext = target.getContext;
-				target.getContext = function (type, attributes) {
-					if (type === "2d") {
-						var options = copyContextAttributes(attributes);
-						if (typeof options.willReadFrequently === "undefined") {
-							options.willReadFrequently = true;
-						}
-						return nativeGetContext.call(this, type, options);
-					}
-					return nativeGetContext.call(this, type, attributes);
-				};
-				target.__codexWillReadPatched = true;
-			}
-
-			patchCanvasGetContext(window.HTMLCanvasElement && HTMLCanvasElement.prototype);
-			patchCanvasGetContext(window.OffscreenCanvas && OffscreenCanvas.prototype);
-
-			function trackContext(context) {
-				if (context && trackedContexts.indexOf(context) === -1) {
-					trackedContexts.push(context);
-				}
-				return context;
-			}
-
-			function isUserActivationAvailable() {
-				return !!(navigator.userActivation && (navigator.userActivation.isActive || navigator.userActivation.hasBeenActive));
-			}
-
-			function markActivated() {
-				userActivated = true;
-				allowNativeResume = true;
-				try {
-					resumeAudioContexts();
-				} finally {
-					allowNativeResume = false;
-				}
-			}
-
-			function patchAudioResume(proto) {
-				if (!proto || !proto.resume || proto.__codexResumePatched) {
-					return;
-				}
-				var nativeResume = proto.resume;
-				proto.resume = function () {
-					var context = trackContext(this);
-					if (!context || context.state === "closed") {
-						return Promise.resolve(context);
-					}
-					if (!allowNativeResume && !isUserActivationAvailable()) {
-						return Promise.resolve(context);
-					}
-					try {
-						var result = nativeResume.call(context);
-						if (result && typeof result.catch === "function") {
-							return result.catch(function () {
-								return context;
-							});
-						}
-						return Promise.resolve(context);
-					} catch (error) {
-						return Promise.resolve(context);
-					}
-				};
-				proto.__codexResumePatched = true;
-			}
-
-			function resumeAudioContexts() {
-				for (var i = trackedContexts.length - 1; i >= 0; i--) {
-					var context = trackedContexts[i];
-					if (!context || typeof context.resume !== "function" || context.state === "closed") {
-						trackedContexts.splice(i, 1);
-						continue;
-					}
-					if (context.state !== "running") {
-						try {
-							var pendingResume = context.resume();
-							if (pendingResume && typeof pendingResume.catch === "function") {
-								pendingResume.catch(function () {});
-							}
-						} catch (error) {}
-					}
-				}
-			}
-
-			function wrapAudioContext(name) {
-				var NativeContext = window[name];
-				if (typeof NativeContext !== "function") {
-					return;
-				}
-				patchAudioResume(NativeContext.prototype);
-
-				function WrappedAudioContext() {
-					var context;
-					if (arguments.length === 0) {
-						context = new NativeContext();
-					} else if (arguments.length === 1) {
-						context = new NativeContext(arguments[0]);
-					} else {
-						var args = [null];
-						for (var i = 0; i < arguments.length; i++) {
-							args.push(arguments[i]);
-						}
-						context = new (Function.prototype.bind.apply(NativeContext, args))();
-					}
-					return trackContext(context);
-				}
-
-				WrappedAudioContext.prototype = NativeContext.prototype;
-				try {
-					Object.setPrototypeOf(WrappedAudioContext, NativeContext);
-				} catch (error) {}
-				window[name] = WrappedAudioContext;
-			}
-
-			wrapAudioContext("AudioContext");
-			wrapAudioContext("webkitAudioContext");
-			window.__codexMarkActivated = markActivated;
-
-			["pointerdown", "mousedown", "touchstart", "keydown"].forEach(function (eventName) {
-				window.addEventListener(eventName, markActivated, { passive: true, capture: true });
-			});
-		})();
+		}, false);
 	</script>
-		
-	<meta id="viewport" name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+	<meta id="viewport" name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 	<meta name="apple-mobile-web-app-capable" content="yes">
 	<meta name="mobile-web-app-capable" content="yes">
-	
+	<script type="text/javascript" src="./Funkin.js?233s"></script>
 	<script>
-		window.addEventListener ("touchmove", function (event) { event.preventDefault (); }, { capture: false, passive: false });
-		if (typeof window.devicePixelRatio != 'undefined' && window.devicePixelRatio > 2) {
-			var meta = document.getElementById ("viewport");
-			meta.setAttribute ('content', 'width=device-width, initial-scale=' + (2 / window.devicePixelRatio) + ', user-scalable=no');
+		window.addEventListener("touchmove", function (event) {
+			event.preventDefault();
+		}, { capture: false, passive: false });
+		if (typeof window.devicePixelRatio !== "undefined" && window.devicePixelRatio > 2) {
+			var meta = document.getElementById("viewport");
+			meta.setAttribute("content", "width=device-width, initial-scale=" + (2 / window.devicePixelRatio) + ", user-scalable=no");
 		}
 	</script>
-	
 	<style>
-		html,body { margin: 0; padding: 0; height: 100%; overflow: hidden; }
-		#openfl-content { background: #000000; width: 100%; height: 100%; }
-		#launch-overlay {
-			position: fixed;
-			inset: 0;
-			z-index: 10;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			padding: 24px;
-			background:
-				radial-gradient(circle at top, rgba(143, 255, 111, 0.18), transparent 42%),
-				linear-gradient(180deg, rgba(11, 20, 8, 0.98), rgba(2, 5, 2, 0.98));
-			color: #f4ffe8;
-			font-family: 'VCR OSD Mono', monospace;
-			text-align: center;
-			cursor: pointer;
-		}
-		#launch-overlay.is-hidden {
-			display: none;
-		}
-		#launch-card {
-			max-width: 520px;
-			padding: 32px 28px;
-			border: 1px solid rgba(181, 255, 153, 0.28);
-			border-radius: 20px;
-			background: rgba(9, 18, 8, 0.86);
-			box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
-		}
-		#launch-card h1 {
-			margin: 0 0 12px;
-			font-size: clamp(1.8rem, 4vw, 3rem);
-			letter-spacing: 0.06em;
-			text-transform: uppercase;
-		}
-		#launch-card p {
+		html, body {
 			margin: 0;
-			font-size: 0.98rem;
-			line-height: 1.7;
-			color: rgba(244, 255, 232, 0.82);
+			padding: 0;
+			height: 100%;
+			overflow: hidden;
 		}
-		#launch-card strong {
-			display: inline-block;
-			margin-top: 18px;
-			padding: 10px 16px;
-			border-radius: 999px;
-			background: rgba(154, 255, 120, 0.12);
-			color: #cfffbd;
-			font-size: 0.86rem;
-			letter-spacing: 0.08em;
-			text-transform: uppercase;
+		#openfl-content {
+			background: #000000;
+			width: 100%;
+			height: 100%;
 		}
 		@font-face {
 			font-family: 'Pixel Arial 11 Bold';
@@ -256,55 +69,12 @@
 			font-style: normal;
 		}
 	</style>
-	
 </head>
 <body>
 	<noscript>This webpage makes extensive use of JavaScript. Please enable JavaScript in your web browser to view this page.</noscript>
-	
-	<div id="launch-overlay" role="button" tabindex="0" aria-label="Start Zardy Foolhardy Mod Pack">
-		<div id="launch-card">
-			<h1>Zardy Foolhardy</h1>
-			<p>Click once to start the web build. This lets the game initialize audio the way Chrome expects and keeps the launch clean.</p>
-			<strong>Click Anywhere To Begin</strong>
-		</div>
-	</div>
-
 	<div id="openfl-content"></div>
-	
 	<script type="text/javascript">
-		(function () {
-			var started = false;
-			var overlay = document.getElementById("launch-overlay");
-
-			function loadGame() {
-				if (started) {
-					return;
-				}
-				started = true;
-				if (window.__codexMarkActivated) {
-					window.__codexMarkActivated();
-				}
-				overlay.classList.add("is-hidden");
-
-				var script = document.createElement("script");
-				script.src = "./Funkin.js?233s";
-				script.onload = function () {
-					lime.embed("Funkin", "openfl-content", 1280, 720, { parameters: {} });
-				};
-				document.head.appendChild(script);
-			}
-
-			overlay.addEventListener("click", loadGame);
-			overlay.addEventListener("keydown", function (event) {
-				if (event.key === "Enter" || event.key === " ") {
-					event.preventDefault();
-					loadGame();
-				}
-			});
-			["pointerdown", "mousedown", "touchstart", "keydown"].forEach(function (eventName) {
-				window.addEventListener(eventName, loadGame, { once: true, capture: true });
-			});
-		})();
+		lime.embed("Funkin", "openfl-content", 1280, 720, { parameters: {} });
 	</script>
 </body>
 </html>

@@ -75,6 +75,72 @@
 	<div id="openfl-content"></div>
 	<script type="text/javascript">
 		lime.embed("Funkin", "openfl-content", 1280, 720, { parameters: {} });
+
+		(function () {
+			var root = document.getElementById("openfl-content");
+			if (root) {
+				root.setAttribute("tabindex", "0");
+			}
+
+			function focusGame() {
+				try {
+					window.focus();
+				} catch (error) {}
+				try {
+					document.body.focus();
+				} catch (error) {}
+				try {
+					if (root) {
+						root.focus();
+					}
+				} catch (error) {}
+			}
+
+			function fireEnter(target) {
+				if (!target || typeof target.dispatchEvent !== "function") {
+					return;
+				}
+				var down = new KeyboardEvent("keydown", {
+					key: "Enter",
+					code: "Enter",
+					keyCode: 13,
+					which: 13,
+					bubbles: true
+				});
+				var up = new KeyboardEvent("keyup", {
+					key: "Enter",
+					code: "Enter",
+					keyCode: 13,
+					which: 13,
+					bubbles: true
+				});
+				try {
+					Object.defineProperty(down, "keyCode", { get: function () { return 13; } });
+					Object.defineProperty(down, "which", { get: function () { return 13; } });
+					Object.defineProperty(up, "keyCode", { get: function () { return 13; } });
+					Object.defineProperty(up, "which", { get: function () { return 13; } });
+				} catch (error) {}
+				target.dispatchEvent(down);
+				target.dispatchEvent(up);
+			}
+
+			function nudgeTitleScreen() {
+				focusGame();
+				fireEnter(window);
+				fireEnter(document);
+				fireEnter(document.body);
+				if (root) {
+					fireEnter(root);
+				}
+			}
+
+			window.addEventListener("pointerdown", focusGame, { passive: true });
+			window.addEventListener("mousedown", focusGame, { passive: true });
+			window.addEventListener("touchstart", focusGame, { passive: true });
+
+			setTimeout(nudgeTitleScreen, 3500);
+			setTimeout(nudgeTitleScreen, 5500);
+		})();
 	</script>
 </body>
 </html>

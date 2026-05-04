@@ -1,12 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TextureAtlas imagePath="Zardy.png">
+<TextureAtlas imagePath="BOYFRIEND-duet.png">
 	<!-- Created with Adobe Animate version 21.0.3.38773 -->
 	<!-- http://www.adobe.com/products/animate.html -->
-	<SubTexture name="BF idle dance0000" x="5" y="0" width="765" height="759" frameX="50" frameY="340" frameWidth="376" frameHeight="446"/>/>
-	<SubTexture name="BF idle dance0001" x="5" y="0" width="765" height="759" frameX="50" frameY="340" frameWidth="376" frameHeight="446"/>/>
-	<SubTexture name="BF idle dance0002" x="828" y="0" width="765" height="759" frameX="50" frameY="340" frameWidth="376" frameHeight="446"/>/>
-	<SubTexture name="BF idle dance0003" x="828" y="0" width="765" height="759" frameX="50" frameY="340" frameWidth="376" frameHeight="446"/>/>
-	<SubTexture name="BF idle dance0004" x="1651" y="0" width="765" height="759" frameX="50" frameY="340" frameWidth="376" frameHeight="446"/>/>
+	<SubTexture name="BF idle dance0000" x="5" y="0" width="765" height="759" frameX="50" frameY="340" frameWidth="376" frameHeight="446"/>
+	<SubTexture name="BF idle dance0001" x="5" y="0" width="765" height="759" frameX="50" frameY="340" frameWidth="376" frameHeight="446"/>
+	<SubTexture name="BF idle dance0002" x="828" y="0" width="765" height="759" frameX="50" frameY="340" frameWidth="376" frameHeight="446"/>
+	<SubTexture name="BF idle dance0003" x="828" y="0" width="765" height="759" frameX="50" frameY="340" frameWidth="376" frameHeight="446"/>
+	<SubTexture name="BF idle dance0004" x="1651" y="0" width="765" height="759" frameX="50" frameY="340" frameWidth="376" frameHeight="446"/>
 	<SubTexture name="BF NOTE DOWN0000" x="2474" y="5" width="813" height="813" frameX="10" frameY="340" frameWidth="813" frameHeight="814"/>
 	<SubTexture name="BF NOTE DOWN0001" x="5" y="828" width="813" height="813" frameX="10" frameY="340" frameWidth="813" frameHeight="814"/>
 	<SubTexture name="BF NOTE DOWN0002" x="828" y="828" width="813" height="813" frameX="10" frameY="340" frameWidth="813" frameHeight="814"/>

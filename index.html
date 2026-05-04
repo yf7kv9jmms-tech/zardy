@@ -108,6 +108,7 @@
 			function startGame() {
 				if (started) return;
 				started = true;
+				console.log("Starting Funkin web build...");
 				overlay.classList.add("is-hidden");
 				lime.embed("Funkin", "openfl-content", 1280, 720, { parameters: {} });
 			}

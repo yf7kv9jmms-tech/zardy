@@ -16,6 +16,7 @@
 			});
 		}
 	</script>
+	<script type="text/javascript" src="./lime.js"></script>
 	<script type="text/javascript" src="./Funkin.js"></script>
 	<script>
 		window.addEventListener("touchmove", function (event) { event.preventDefault(); }, { capture: false, passive: false });
@@ -116,7 +117,10 @@
 				console.log("Starting Funkin web build...");
 				overlay.classList.add("is-hidden");
 				try {
-					lime.embed("Funkin", "openfl-content", 1280, 720, { parameters: {} });
+					var application = new lime.app.Application();
+					application.createWindow({ width: 1280, height: 720, element: document.getElementById("openfl-content") });
+					application.exec();
+					lime.$scripts["Funkin"](application, lime);
 				} catch (err) {
 					reportError(err);
 				}

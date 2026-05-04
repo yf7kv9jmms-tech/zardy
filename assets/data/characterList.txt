@@ -6,6 +6,8 @@ pico
 mom
 mom-car
 bf-car
+bf-duet
+bf-retro
 parents-christmas
 monster-christmas
 bf-christmas

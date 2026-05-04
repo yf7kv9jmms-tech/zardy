@@ -2,35 +2,24 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<title>FNF: Zardy Foolhardy Mod Pack</title>
-	<meta name="description" content="Standalone web build of FNF: Zardy Foolhardy Mod Pack.">
-	<meta name="theme-color" content="#050505">
-	<link rel="icon" type="image/png" href="./assets/images/logo.png">
-	<script>
-		window.addEventListener("load", function () {
-			window.focus();
-			document.body.addEventListener("click", function () {
-				window.focus();
-			}, false);
-		});
-		window.addEventListener("keydown", function (event) {
-			if ([32, 37, 38, 39, 40].indexOf(event.keyCode) > -1) {
-				event.preventDefault();
-			}
-		}, false);
-	</script>
+	<title>Friday Night Funkin' — Zardy (Kade Engine)</title>
+	<meta name="description" content="HTML5 build of FNF Zardy mod (Kade Engine).">
+	<meta name="theme-color" content="#000000">
 	<meta id="viewport" name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 	<meta name="apple-mobile-web-app-capable" content="yes">
-	<meta name="mobile-web-app-capable" content="yes">
-	<script type="text/javascript" src="./Funkin.js?233s"></script>
+	<link rel="icon" type="image/png" href="./assets/images/logo.png">
+	<script type="text/javascript" src="./Funkin.js"></script>
 	<script>
-		window.addEventListener("touchmove", function (event) {
-			event.preventDefault();
-		}, { capture: false, passive: false });
+		window.addEventListener("touchmove", function (event) { event.preventDefault(); }, { capture: false, passive: false });
 		if (typeof window.devicePixelRatio !== "undefined" && window.devicePixelRatio > 2) {
 			var meta = document.getElementById("viewport");
 			meta.setAttribute("content", "width=device-width, initial-scale=" + (2 / window.devicePixelRatio) + ", user-scalable=no");
 		}
+		window.addEventListener("keydown", function (e) {
+			if (["Tab", "Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].indexOf(e.code) > -1) {
+				e.preventDefault();
+			}
+		}, false);
 	</script>
 	<style>
 		html, body {
@@ -38,7 +27,7 @@
 			padding: 0;
 			height: 100%;
 			overflow: hidden;
-			background: #050505;
+			background: #000000;
 		}
 		#openfl-content {
 			background: #000000;
@@ -53,11 +42,9 @@
 			align-items: center;
 			justify-content: center;
 			padding: 24px;
-			background:
-				radial-gradient(circle at top, rgba(143, 255, 111, 0.16), transparent 42%),
-				linear-gradient(180deg, rgba(11, 20, 8, 0.98), rgba(2, 5, 2, 0.98));
-			color: #f4ffe8;
-			font-family: 'VCR OSD Mono', monospace;
+			background: linear-gradient(180deg, rgba(20, 10, 10, 0.95), rgba(0, 0, 0, 0.98));
+			color: #eee;
+			font-family: system-ui, sans-serif;
 			text-align: center;
 			cursor: pointer;
 		}
@@ -65,35 +52,11 @@
 			display: none;
 		}
 		#launch-card {
-			max-width: 520px;
-			padding: 32px 28px;
-			border: 1px solid rgba(181, 255, 153, 0.28);
-			border-radius: 20px;
-			background: rgba(9, 18, 8, 0.86);
-			box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
-		}
-		#launch-card h1 {
-			margin: 0 0 12px;
-			font-size: clamp(1.8rem, 4vw, 3rem);
-			letter-spacing: 0.06em;
-			text-transform: uppercase;
-		}
-		#launch-card p {
-			margin: 0;
-			font-size: 0.98rem;
-			line-height: 1.7;
-			color: rgba(244, 255, 232, 0.82);
-		}
-		#launch-card strong {
-			display: inline-block;
-			margin-top: 18px;
-			padding: 10px 16px;
-			border-radius: 999px;
-			background: rgba(154, 255, 120, 0.12);
-			color: #cfffbd;
-			font-size: 0.86rem;
-			letter-spacing: 0.08em;
-			text-transform: uppercase;
+			max-width: 480px;
+			padding: 24px;
+			border: 1px solid rgba(255, 255, 255, 0.15);
+			border-radius: 12px;
+			background: rgba(20, 20, 20, 0.9);
 		}
 		@font-face {
 			font-family: 'Pixel Arial 11 Bold';
@@ -122,12 +85,11 @@
 	</style>
 </head>
 <body>
-	<noscript>This webpage makes extensive use of JavaScript. Please enable JavaScript in your web browser to view this page.</noscript>
-	<div id="launch-overlay" role="button" tabindex="0" aria-label="Start Zardy Foolhardy Mod Pack">
+	<noscript>This webpage requires JavaScript.</noscript>
+	<div id="launch-overlay" role="button" tabindex="0" aria-label="Start game">
 		<div id="launch-card">
-			<h1>Zardy Foolhardy</h1>
-			<p>Click once to start the web build. This gives the game a real user interaction before it initializes audio.</p>
-			<strong>Click Anywhere To Start</strong>
+			<p style="margin:0 0 12px;font-size:1.1rem;">Click or tap to start (needed for audio in most browsers).</p>
+			<p style="margin:0;font-size:0.85rem;opacity:0.75;">Friday Night Funkin' — Zardy · Kade Engine web build</p>
 		</div>
 	</div>
 	<div id="openfl-content"></div>
@@ -135,23 +97,16 @@
 		(function () {
 			var overlay = document.getElementById("launch-overlay");
 			var started = false;
-
 			function startGame() {
-				if (started) {
-					return;
-				}
+				if (started) return;
 				started = true;
 				overlay.classList.add("is-hidden");
 				lime.embed("Funkin", "openfl-content", 1280, 720, { parameters: {} });
-				try {
-					window.focus();
-				} catch (error) {}
 			}
-
 			overlay.addEventListener("click", startGame);
-			overlay.addEventListener("keydown", function (event) {
-				if (event.key === "Enter" || event.key === " ") {
-					event.preventDefault();
+			overlay.addEventListener("keydown", function (e) {
+				if (e.key === "Enter" || e.key === " ") {
+					e.preventDefault();
 					startGame();
 				}
 			});

@@ -105,13 +105,30 @@
 		(function () {
 			var overlay = document.getElementById("launch-overlay");
 			var started = false;
+			function reportError(error) {
+				console.error(error);
+				overlay.classList.remove("is-hidden");
+				overlay.textContent = "Error starting game: " + (error && error.message ? error.message : error);
+			}
 			function startGame() {
 				if (started) return;
 				started = true;
 				console.log("Starting Funkin web build...");
 				overlay.classList.add("is-hidden");
-				lime.embed("Funkin", "openfl-content", 1280, 720, { parameters: {} });
+				try {
+					lime.embed("Funkin", "openfl-content", 1280, 720, { parameters: {} });
+				} catch (err) {
+					reportError(err);
+				}
 			}
+			window.addEventListener("error", function (evt) {
+				console.error("Unhandled error:", evt.error || evt.message || evt.filename || evt);
+				reportError(evt.error || evt.message || evt.filename || evt);
+			});
+			window.addEventListener("unhandledrejection", function (evt) {
+				console.error("Unhandled rejection:", evt.reason);
+				reportError(evt.reason || "Unhandled promise rejection");
+			});
 			overlay.addEventListener("click", startGame);
 			overlay.addEventListener("keydown", function (e) {
 				if (e.key === "Enter" || e.key === " ") {
